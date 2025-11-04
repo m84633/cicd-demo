@@ -1,0 +1,55 @@
+name: "partivo_tickets"
+mode: "dev"
+port: 8081
+version: 1.0.0
+time_zone: "Asia/Taipei"
+
+jwt:
+  algorithm: "RS256"
+  secret: "partivo-super-secret-key-for-dev"
+  private_key_file: "config/keys/private.pem"
+  public_key_file: "config/keys/public.pem"
+log:
+  level: "debug"
+  filename: "logs/app.log"
+  max_size: 200 #MB
+  max_age: 30 #預設儲存時間
+  max_backups: 7
+mongodb:
+  host: "host.docker.internal"
+  port: 27017
+  db: "partivo_tickets"
+keto:
+  read_addr: "192.168.1.123:4466"
+  write_addr: "192.168.1.123:4467"
+worker:
+  outbox:
+    interval_seconds: 5
+    batch_size: 10
+  ticket_expirer:
+    interval_seconds: 3600
+rabbitmq:
+  host: "host.docker.internal"
+  port: 5672
+  user: "guest"
+  password: "guest"
+  generate_tickets_topic: "tasks.tickets.generate"
+  payment_event_topic: "tasks.payments.event"
+  update_bill_status_topic: "events.bills.status_updated"
+
+event_service:
+  addr: "192.168.1.123:9081"
+
+redis:
+  addr: "host.docker.internal:6379"
+  password: ""
+  db: 0
+
+rate_limiter:
+  default:
+    interval: "1s"
+    limit: 60
+  policies:
+    export_orders:
+      interval: "1m"
+      limit: 1

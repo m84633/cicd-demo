@@ -1,0 +1,216 @@
+syntax = "proto3";
+
+option go_package = "partivo_tickets/api/tickets";
+
+package api.tickets;
+
+import "common.proto";
+import "google/api/annotations.proto";
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+service TicketsService {
+  rpc GetEventTickets (GetEventTicketTypesRequest) returns (Response) {
+    option (google.api.http) = {
+      get: "/api/v1/events/{event}/tickets"
+    };
+  }
+
+  rpc GetSessionTickets (GetSessionTicketsRequest) returns (Response) {
+    option (google.api.http) = {
+      get: "/api/v1/sessions/{session}/tickets"
+    };
+  }
+}
+
+service TicketsAdminService {
+  rpc CheckInTicket (CheckInTicketRequest) returns (Response) {
+    option (google.api.http) = {
+      post: "/api/v1/console/tickets:check-in",
+      body: "*"
+    };
+  }
+
+  rpc AddTicketType (AddTicketTypeRequest) returns (Response) {
+    option (google.api.http) = {
+      post: "/api/v1/console/events/{event}/tickets"
+      body: "*"
+    };
+  }
+
+  rpc GetEventTicketTypes (GetEventTicketTypesRequest) returns (Response) {
+    option (google.api.http) = {
+      get: "/api/v1/console/events/{event}/tickets"
+    };
+  }
+
+  rpc DeleteTicketType (DeleteTicketTypeRequest) returns (Response) {
+    option (google.api.http) = {
+      delete: "/api/v1/console/tickets/{ticket}"
+    };
+  }
+
+  rpc UpdateTicketType (UpdateTicketTypeRequest) returns (Response) {
+    option (google.api.http) = {
+      put: "/api/v1/console/tickets/{ticket}"
+      body:"*"
+    };
+  }
+
+  rpc UpdateTicketTypesOrder (UpdateTicketTypesOrderRequest) returns (Response) {
+    option (google.api.http) = {
+      patch: "/api/v1/console/events/{event}/tickets/order",
+      body: "*"
+    };
+  }
+}
+
+message AddTicketTypeRequest {
+  message Session {
+    string session = 1 [(buf.validate.field).string.len = 24];
+    google.protobuf.Timestamp sale_start_at = 2;
+    google.protobuf.Timestamp sale_end_at = 3;
+  }
+//  repeated string session = 1 [(buf.validate.field).repeated = {min_items: 1,
+//    unique:true,
+//    items: {
+//      string: {
+//        len: 24
+//      }
+//    }}];
+  string name = 2 [(buf.validate.field).string.min_len = 1];
+  uint32 quantity = 3 [(buf.validate.field).uint32.gt = 0];
+  string price = 4 [(buf.validate.field).string.pattern = "^\\d+(\\.\\d{1,2})?$"];
+  string desc = 5 [(buf.validate.field).string.max_len = 255];
+  repeated Session sessions = 6 [(buf.validate.field).repeated = {min_items: 1}];
+  bool  visibility = 10;
+  optional google.protobuf.Timestamp start_showing_on = 8;
+  optional google.protobuf.Timestamp stop_showing_on = 9;
+  uint32 pick = 11 [(buf.validate.field).uint32.gte = 0];
+  uint32 min_quantity_per_order =12 [(buf.validate.field).uint32.gt = 0];
+  uint32 max_quantity_per_order = 13 [(buf.validate.field).uint32.gt = 0];
+  option (buf.validate.message).cel = { id: "max_gt_min_quantity", expression: "this.max_quantity_per_order > this.min_quantity_per_order" };
+  optional google.protobuf.Duration due_duration = 14;
+  string event = 15 [(buf.validate.field).string.len = 24];
+  bool enable = 16;
+  string sale_time_setting = 7;
+
+  reserved "session";
+  reserved 1;
+}
+
+message GetEventTicketTypesRequest {
+  string event =1 [(buf.validate.field).string.len = 24];
+}
+
+message GetEventTicketTypesResponse {
+  message Ticket {
+    string id = 1;
+    string name = 2;
+    uint32 quantity = 3;
+    string price = 4 [(buf.validate.field).string.pattern = "^\\\\d+(\\\\.\\\\d{1,2})?$"];
+    string desc = 5;
+    bool  visibility = 8;
+    google.protobuf.Timestamp start_showing_on = 9;
+    google.protobuf.Timestamp stop_showing_on = 10;
+    google.protobuf.Timestamp created_at = 11;
+    google.protobuf.Timestamp updated_at = 12;
+    User created_by = 13;
+    User updated_by = 14;
+    uint32 pick = 15;
+    uint32 min_quantity_per_order = 16;
+    uint32 max_quantity_per_order = 17;
+    message SessionInfo {
+      string session = 1;
+      uint32 quantity = 2;
+    }
+    repeated SessionInfo sessions_info = 18;
+    bool enable = 19;
+    string sale_time_setting = 20;
+  }
+  repeated Ticket data = 1;
+  reserved 6,7;
+  reserved "sale_start_at", "sale_end_at";
+}
+
+message DeleteTicketTypeRequest {
+  string ticket = 1 [(buf.validate.field).string.len = 24];
+}
+
+message UpdateTicketTypeRequest {
+  message Session {
+    string session = 1 [(buf.validate.field).string.len = 24];
+    google.protobuf.Timestamp sale_start_at = 2;
+    google.protobuf.Timestamp sale_end_at = 3;
+  }
+  string ticket = 1 [(buf.validate.field).string.len = 24];
+  string name = 2 [(buf.validate.field).string.min_len = 1];
+  uint32 quantity = 3 [(buf.validate.field).uint32.gt = 0];
+  string price = 4 [(buf.validate.field).string.pattern = "^\\d+(\\.\\d{1,2})?$"];
+
+  string desc = 5 [(buf.validate.field).string.max_len = 255];
+  google.protobuf.Timestamp sale_start_at =6;
+  google.protobuf.Timestamp sale_end_at = 7;
+  bool  visibility = 8 ;
+  optional google.protobuf.Timestamp start_showing_on = 9;
+  optional google.protobuf.Timestamp stop_showing_on = 10;
+  uint32 min_quantity_per_order = 11 [(buf.validate.field).uint32.gt = 0];
+  uint32 max_quantity_per_order = 12 [(buf.validate.field).uint32.gt = 0];
+  option (buf.validate.message).cel = { id: "max_gt_min_quantity", expression: "this.max_quantity_per_order > this.min_quantity_per_order" };
+  optional google.protobuf.Duration due_duration = 13;
+  string sale_time_setting = 14;
+  repeated Session sessions =15 [(buf.validate.field).repeated = {min_items: 1}];
+  bool enable = 16;
+
+//  reserved "quantity";
+//  reserved 3;
+}
+
+message UpdateTicketTypesOrderRequest {
+  string event = 1 [(buf.validate.field).string.len = 24];
+  repeated string order = 2 [(buf.validate.field).repeated = {min_items: 2,
+    unique:true,
+    items: {
+      string: {
+        len: 24
+      }
+    }}];
+}
+
+message GetSessionTicketsRequest {
+  string session = 1 [(buf.validate.field).string.len = 24];
+}
+
+message GetSessionTicketsResponse {
+  message Ticket {
+    string id = 1;
+    string name = 2;
+    uint32 total_quantity = 3;
+    string price = 4;
+    string desc = 5;
+    uint32 pick = 8;
+    uint32 min_per_order = 9;
+    uint32 max_per_order = 10;
+    uint32 quantity = 11;
+    bool enable = 12;
+
+    reserved 6,7;
+    reserved "sale_start_at","sale_end_at";
+  }
+  repeated Ticket data = 1;
+
+}
+
+message CheckInTicketRequest {
+  string qr_code = 1 [(buf.validate.field).string.min_len = 1];
+}
+
+message CheckInTicketResponse {
+  string ticket_id = 1;
+  string status = 2;
+  google.protobuf.Timestamp used_at = 3;
+  User customer = 4;
+  string order_item_name = 5;
+  bool checked_in_now = 6;
+}

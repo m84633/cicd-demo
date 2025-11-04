@@ -1,0 +1,271 @@
+syntax = "proto3";
+
+option go_package = "partivo_tickets/api/orders";
+
+package api.orders;
+
+import "common.proto";
+import "google/api/annotations.proto";
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+service OrdersAdminService {
+
+
+  rpc IsEventHasOpenOrders (IsEventHasOrdersRequest) returns (Response) {
+//    option (google.api.http) = {
+//      get: "/api/v1/console/events/{event}/orders/has-open"
+//    };
+  }
+
+  rpc GetOrdersByEvent (GetOrdersByEventRequest) returns (Response) {
+    option (google.api.http) = {
+      get: "/api/v1/console/events/{event}/orders"
+    };
+  }
+
+  rpc GetOrdersBySession (GetOrdersBySessionRequest) returns (Response) {
+    option (google.api.http) = {
+      get: "/api/v1/console/sessions/{session}/orders"
+    };
+  }
+
+  rpc ChangeOrderItemStatus (ChangeOrderItemStatusRequest) returns (Response) {
+    option (google.api.http) = {
+      patch: "/api/v1/console/orders/{order}/items/{item}",
+      body: "*"
+    };
+  }
+
+  rpc GetOrderByID (GetOrderByIDRequest) returns (Response) {
+    option (google.api.http) = {
+      get: "/api/v1/console/orders/{order}"
+    };
+  }
+
+  rpc CancelOrder (CancelOrderRequest) returns (Response) {
+    option (google.api.http) = {
+      post: "/api/v1/console/orders/{order}:cancel",
+      body: "*"
+    };
+  }
+
+  rpc RejectOrderItemRefund (RejectOrderItemRefundRequest) returns (Response) {
+    option (google.api.http) = {
+      post: "/api/v1/console/orders/{order}/items/{item}:reject-refund",
+      body: "*"
+    };
+  }
+}
+
+service OrderService {
+  rpc GetUserOrders (GetUserOrdersRequest) returns (Response) {
+    option (google.api.http) = {
+      get: "/api/v1/orders"
+    };
+  }
+  rpc AddOrder (AddOrderRequest) returns (Response) {
+    option (google.api.http) = {
+      post: "/api/v1/events/{event}/orders",
+      body: "*"
+    };
+  };
+
+  rpc CancelOrder (CancelOrderRequest) returns (Response) {
+    option (google.api.http) = {
+      post: "/api/v1/orders/{order}:cancel",
+      body: "*"
+    };
+  }
+
+  rpc RequestOrderItemRefund (RequestOrderItemRefundRequest) returns (Response) {
+    option (google.api.http) = {
+      post: "/api/v1/orders/{order}/items/{item}:request-refund",
+      body: "*"
+    };
+  }
+}
+
+
+message AddOrderRequest {
+  message Item {
+    string ticket = 1 [(buf.validate.field).string.len = 24] ;
+    uint32 quantity = 2 [(buf.validate.field).uint32.gt = 0];
+  }
+  message PaymentMethod {
+    string id = 1 [(buf.validate.field).string.len = 24];
+    string name = 2 [(buf.validate.field).string.min_len = 1];
+  }
+  repeated Item items = 3 [(buf.validate.field).repeated = {min_items: 1}];
+  string subtotal = 4 [(buf.validate.field).string.min_len = 1];
+  string total = 5 [(buf.validate.field).string.min_len = 1];
+  string event = 7 [(buf.validate.field).string.len = 24] ;
+  string merchant_id = 8 [(buf.validate.field).string.len = 24];
+  PaymentMethod payment_method = 9;
+
+  reserved 1, 6;
+  reserved "payment", "form";
+}
+
+message AddOrderResponse {
+  string order_id = 1;
+  string bill_id = 2;
+}
+
+message IsEventHasOrdersRequest {
+  string event = 1 [(buf.validate.field).string.len = 24];
+}
+
+message GetOrdersByEventRequest {
+  string event = 1 [(buf.validate.field).string.len = 24];
+  optional uint32 page = 2;
+}
+
+message GetOrdersResponse {
+  message GetOrdersOrder {
+    message ReturnRequest{
+      string reason = 1;
+      google.protobuf.Timestamp requested_at = 2;
+    }
+    string id = 1;
+    message Item {
+      string ticket_stock = 1;
+      string session = 2;
+      int64 quantity = 3;
+      string price = 4;
+      string name = 5;
+      string status = 6;
+      ReturnRequest return_request = 7;
+    }
+    repeated Item items = 3;
+    string subtotal = 4;
+    string total = 5;
+    string event = 7;
+    string status = 8;
+    string note = 9;
+    api.User user = 10;
+    google.protobuf.Timestamp created_at = 11;
+    google.protobuf.Timestamp updated_at = 12;
+    string serial = 13;
+
+    reserved 2;
+    reserved "payment";
+  }
+  repeated GetOrdersOrder data = 1;
+  api.PageInfo page_info = 2;
+}
+
+message GetOrdersBySessionRequest {
+  string session = 1 [(buf.validate.field).string.len = 24];
+  optional uint32 page = 2;
+}
+
+message GetUserOrdersResponse {
+  message GetOrdersOrder {
+    string id = 1;
+    message Item {
+      string ticket_stock = 1;
+      string session = 2;
+      int64 quantity = 3;
+      string price = 4;
+      string name = 5;
+    }
+    repeated Item items = 3;
+    string total = 5;
+    string event = 7;
+    string status = 8;
+    google.protobuf.Timestamp created_at = 11;
+    string serial = 12;
+
+    reserved 2;
+    reserved "payment";
+  }
+  repeated GetOrdersOrder data = 1;
+  string after = 2;
+}
+
+message GetUserOrdersRequest {
+  optional string after = 1;
+}
+
+message ChangeOrderItemStatusRequest {
+  enum OrderItemStatus {
+    UNKNOWN = 0;
+    CANCELED = 1;
+    RETURN_REQUESTED = 3;
+    RETURN_APPROVED = 4;
+  }
+  string order = 1 [(buf.validate.field).string.len = 24];
+  string item = 2 [(buf.validate.field).string.len = 24];
+  OrderItemStatus status = 3 [(buf.validate.field).enum.defined_only = true];
+  string reason = 4;
+}
+
+message GetOrderByIDRequest {
+  string order = 1 [(buf.validate.field).string.len = 24];
+}
+
+message CancelOrderRequest {
+  string order = 1 [(buf.validate.field).string.len = 24];
+  optional string reason = 2;
+}
+
+message RequestOrderItemRefundRequest {
+  string order = 1 [(buf.validate.field).string.len = 24];
+  string item = 2 [(buf.validate.field).string.len = 24];
+  string reason = 3 [(buf.validate.field).string.min_len = 1];
+}
+
+message RejectOrderItemRefundRequest {
+  string order = 1 [(buf.validate.field).string.len = 24];
+  string item = 2 [(buf.validate.field).string.len = 24];
+  string reason = 3 [(buf.validate.field).string.min_len = 1];
+}
+
+
+message GetOrderResponse {
+  message Order {
+    string id = 1;
+    string subtotal = 3;
+    string total = 4;
+    string event = 5;
+    string status = 6;
+    string note = 7;
+    api.User user = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+    string serial = 11;
+
+    reserved 2;
+    reserved "payment";
+  }
+
+  message Item {
+    message ReturnRequest{
+      string reason = 1;
+      google.protobuf.Timestamp requested_at = 2;
+    }
+    string id = 1;
+    string ticket_stock = 2;
+    string session = 3;
+    int64 quantity = 4;
+    string price = 5;
+    string name = 6;
+    string status = 7;
+    ReturnRequest return_request = 8;
+  }
+
+  message Bill {
+    string id = 1;
+    string amount = 2;
+    string type = 3;
+    string status = 4;
+    string payment = 5;
+    google.protobuf.Timestamp created_at = 6;
+  }
+
+  Order order = 1;
+  repeated Item items = 2;
+  repeated Bill bills = 3;
+}
+

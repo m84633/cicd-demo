@@ -1,0 +1,24 @@
+# Build artifacts
+/bin/
+/vendor/
+
+# Log files
+/logs/
+*.log
+
+# IDE settings
+/.idea/
+*.iml
+
+# Environment variables
+# Do not commit .env files containing sensitive credentials.
+.env
+.env.*
+!.env.example
+
+# Secret keys
+# Do not commit private keys.
+config/keys/*.pem
+
+.DS_Store
+coverage.out

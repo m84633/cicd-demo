@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+
+option go_package = "partivo_tickets/api/bills";
+
+package api.bills;
+
+import "common.proto";
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+service BillService {
+  rpc GetTransactionHistory(GetTransactionHistoryRequest) returns (Response) {
+    option (google.api.http) = {
+      get: "/api/v1/orders/{order_id}/transactions"
+    };
+  }
+}
+
+
+service BillAdminService {
+  rpc CreateBill (CreateBillRequest) returns (Response) {
+    option (google.api.http) = {
+      post: "/api/v1/console/orders/{order}/bills"
+      body: "*"
+    };
+  }
+  rpc CancelBill (CancelBillRequest) returns (Response) {
+    option (google.api.http) = {
+      post: "/api/v1/console/bills/{id}:cancel"
+      body: "*"
+    };
+  }
+  rpc CreateRefundBill (CreateRefundBillRequest) returns (Response) {
+    option (google.api.http) = {
+      post: "/api/v1/console/refunds"
+      body: "*"
+    };
+  }
+
+  rpc GetBillsByOrder(GetBillsByOrderRequest) returns (Response) {
+    option (google.api.http) = {
+      get: "/api/v1/console/orders/{order_id}/bills"
+    };
+  }
+}
+
+message PaymentMethod {
+  string id =1 [(buf.validate.field).string.len = 24];
+  string name = 2 [(buf.validate.field).string.min_len = 1];
+}
+
+message CreateBillRequest {
+  string order = 1 [(buf.validate.field).string.len = 24];
+  string amount = 2 [(buf.validate.field).string.min_len = 1];
+  PaymentMethod payment_method = 3;
+}
+
+message CancelBillRequest {
+  string id = 1 [(buf.validate.field).string.len = 24];
+  string reason = 2;
+}
+
+message CreateRefundBillRequest {
+  string order_item_id = 1 [(buf.validate.field).string.len = 24];
+  string amount = 2 [(buf.validate.field).string.min_len = 1];
+  PaymentMethod payment_method = 3;
+  string reason = 4;
+}
+
+message GetBillsByOrderRequest {
+  string order_id = 1 [(buf.validate.field).string.len = 24];
+}
+
+message Bill {
+  string id = 1;
+  string amount = 2;
+  string type = 3;
+  string status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  string note = 6;
+  PaymentMethod payment_method = 7;
+  string payment_id = 8;
+}
+
+message GetBillsByOrderResponse {
+  repeated Bill bills = 1;
+}
+
+message GetTransactionHistoryRequest {
+  string order_id = 1 [(buf.validate.field).string.len = 24];
+}
+
+message Transaction {
+  string id = 1;
+  string amount = 2;
+  string type = 3;
+  string status = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  PaymentMethod payment_method = 6;
+}
+
+message GetTransactionHistoryResponse {
+  repeated Transaction transactions = 1;
+}

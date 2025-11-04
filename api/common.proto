@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option go_package = "partivo_tickets/api";
+
+package api;
+
+import "google/protobuf/any.proto";
+
+
+message User {
+  string user_id = 1;
+  string name = 2;
+  string email = 3;
+  string avatar = 4;
+}
+
+message ID {
+  string id = 1;
+}
+
+message Response {
+  string status = 1;
+  int32 code = 2;
+  optional string message = 3;
+  google.protobuf.Any data = 4;
+}
+
+message PageInfo {
+  int64 total = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  int32 total_pages = 4;
+}
