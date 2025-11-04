@@ -77,6 +77,14 @@ func (m *MockOrderLogic) CreateRefundBill(ctx context.Context, d *dto.CreateRefu
 	return args.Get(0).(primitive.ObjectID), args.Error(1)
 }
 
+func (m *MockOrderLogic) FindRefundableItemForBill(ctx context.Context, bill *models.Bill) (*models.OrderItem, error) {
+	args := m.Called(ctx, bill)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.OrderItem), args.Error(1)
+}
+
 func (m *MockOrderLogic) GetOrdersByEvent(ctx context.Context, eid primitive.ObjectID, pageReq *pagination.PageRequest) (*pagination.PageResult, error) {
 	args := m.Called(ctx, eid, pageReq)
 	if args.Get(0) == nil {
