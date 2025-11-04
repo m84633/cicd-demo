@@ -5,6 +5,7 @@ import (
 	"errors"
 	"partivo_tickets/api/orders"
 	"partivo_tickets/internal/dto"
+	"partivo_tickets/internal/logic"
 	"partivo_tickets/internal/models"
 	"partivo_tickets/pkg/pagination"
 	"testing"
@@ -130,6 +131,16 @@ func (m *MockOrderLogic) ExportEventOrdersByMonth(ctx context.Context, eventID p
 		r1 = args.Get(1).([]byte)
 	}
 	return r0, r1, args.Error(2)
+}
+
+func (m *MockOrderLogic) HandlePaymentSuccess(ctx context.Context, orderID primitive.ObjectID, ticketEventPublisher *logic.TicketEventPublisher) error {
+	args := m.Called(ctx, orderID, ticketEventPublisher)
+	return args.Error(0)
+}
+
+func (m *MockOrderLogic) MarkOrderItemsAsFulfilled(ctx context.Context, orderID primitive.ObjectID) error {
+	args := m.Called(ctx, orderID)
+	return args.Error(0)
 }
 
 // MockTransactionManager is a mock for db.TransactionManager
