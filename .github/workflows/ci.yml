@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - master
   pull_request:
     branches:
       - main
+      - master
   workflow_dispatch:
 
 env:
@@ -36,12 +38,15 @@ jobs:
             go-${{ runner.os }}-${{ env.GO_VERSION }}-
             go-${{ runner.os }}-
 
+      - name: Build console image for E2E tests
+        run: docker build -t partivo_tickets/console:latest --target server-console .
+
       - name: Run tests
         run: go test ./...
 
   docker:
     name: Build & Push Images
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     needs: test
     runs-on: ubuntu-latest
     permissions:
