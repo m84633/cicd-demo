@@ -38,6 +38,12 @@ jobs:
             go-${{ runner.os }}-${{ env.GO_VERSION }}-
             go-${{ runner.os }}-
 
+      - name: Generate demo RSA key pair
+        run: |
+          mkdir -p config/keys
+          openssl genrsa -out config/keys/private.pem 2048
+          openssl rsa -in config/keys/private.pem -pubout -out config/keys/public.pem
+
       - name: Build console image for E2E tests
         run: docker build -t partivo_tickets/console:latest --target server-console .
 
