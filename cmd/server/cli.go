@@ -45,7 +45,7 @@ var frontendCmd = &cobra.Command{
 		// Load configuration
 		appConfig, err := loadConfig(cmd)
 		if err != nil {
-			log.Fatalf(err.Error())
+			log.Fatalf("failed to load config: %v", err)
 		}
 
 		// Initialize application using wire-generated function
@@ -70,7 +70,7 @@ var consoleCmd = &cobra.Command{
 		// Load configuration
 		appConfig, err := loadConfig(cmd)
 		if err != nil {
-			log.Fatalf(err.Error())
+			log.Fatalf("failed to load config: %v", err)
 		}
 
 		// Initialize application using wire-generated function
