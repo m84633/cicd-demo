@@ -64,8 +64,6 @@ jobs:
         include:
           - name: console
             target: server-console
-          - name: consumer
-            target: consumer
 
     steps:
       - name: Check out source
@@ -80,6 +78,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate demo RSA key pair
+        run: |
+          mkdir -p config/keys
+          openssl genrsa -out config/keys/private.pem 2048
+          openssl rsa -in config/keys/private.pem -pubout -out config/keys/public.pem
 
       - name: Extract Docker metadata
         id: meta
