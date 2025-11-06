@@ -62,8 +62,12 @@ jobs:
     strategy:
       matrix:
         include:
+          - name: frontend
+            target: server-frontend
           - name: console
             target: server-console
+          - name: consumer
+            target: consumer
 
     steps:
       - name: Check out source
