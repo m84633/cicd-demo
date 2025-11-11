@@ -3,11 +3,13 @@
 FROM golang:1.24-alpine AS builder
 
 # 設置環境變數
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
 ENV GO111MODULE=on \
     GOPROXY=https://proxy.golang.org,direct \
     CGO_ENABLED=0 \
-    GOOS=linux \
-    GOARCH=amd64
+    GOOS=${TARGETOS} \
+    GOARCH=${TARGETARCH}
 
 WORKDIR /build
 
