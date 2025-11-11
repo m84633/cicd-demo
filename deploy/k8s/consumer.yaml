@@ -1,0 +1,37 @@
+ㄊㄊapiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+  namespace: partivo-tickets
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      imagePullSecrets:
+        - name: ghcr-credentials
+      containers:
+        - name: consumer
+          image: ghcr.io/m84633/partivo-tickets-cicd-demo-consumer:latest
+          imagePullPolicy: IfNotPresent
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - pgrep consumer >/dev/null
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - pgrep consumer >/dev/null
+            initialDelaySeconds: 30
+            periodSeconds: 30

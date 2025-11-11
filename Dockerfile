@@ -18,7 +18,7 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-# 複製所有專案原始碼
+# 複製所有專案原始碼ㄊ
 COPY . .
 
 # 編譯 server 應用程式，並將執行檔輸出到 /server
@@ -79,7 +79,7 @@ ENTRYPOINT ["/app/server", "serve:console", "-c", "config/config_docker.yaml"]
 FROM debian:stable-slim AS consumer
 
 # 安裝必要的 ca-certificates
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates procps && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
