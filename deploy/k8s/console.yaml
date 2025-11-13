@@ -18,7 +18,7 @@ spec:
       containers:
         - name: console
           image: ghcr.io/m84633/partivo-tickets-cicd-demo-console:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8081
           readinessProbe:

@@ -1,4 +1,4 @@
-ㄊㄊapiVersion: apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: consumer
@@ -18,7 +18,7 @@ spec:
       containers:
         - name: consumer
           image: ghcr.io/m84633/partivo-tickets-cicd-demo-consumer:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           readinessProbe:
             exec:
               command:

@@ -18,7 +18,7 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-# 複製所有專案原始碼ㄊ
+# 複製所有專案原始碼
 COPY . .
 
 # 編譯 server 應用程式，並將執行檔輸出到 /server
