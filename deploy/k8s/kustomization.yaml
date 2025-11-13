@@ -7,3 +7,4 @@ resources:
   - frontend.yaml
   - console.yaml
   - consumer.yaml
+  - ingress.yaml
