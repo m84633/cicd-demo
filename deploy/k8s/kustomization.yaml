@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: partivo-tickets
 resources:
   - namespace.yaml
-  - secrets/ghcr-credentials.yaml
+  - secrets/ghcr-credentials.sealed.yaml
   - frontend.yaml
   - console.yaml
   - consumer.yaml
