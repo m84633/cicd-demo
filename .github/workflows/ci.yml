@@ -89,14 +89,16 @@ jobs:
           openssl genrsa -out config/keys/private.pem 2048
           openssl rsa -in config/keys/private.pem -pubout -out config/keys/public.pem
 
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}-${{ matrix.name }}
-          tags: |
-            type=raw,value=latest
-            type=sha,format=short
+      - name: Determine image tag
+        id: image-tag
+        shell: bash
+        run: |
+          if git describe --tags --exact-match >/tmp/tag 2>/dev/null; then
+            tag=$(cat /tmp/tag)
+          else
+            tag=${GITHUB_SHA::7}
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Build and push ${{ matrix.name }} image
         uses: docker/build-push-action@v6
@@ -105,8 +107,9 @@ jobs:
           target: ${{ matrix.target }}
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ghcr.io/${{ github.repository }}-${{ matrix.name }}:${{ steps.image-tag.outputs.tag }}
+            ghcr.io/${{ github.repository }}-${{ matrix.name }}:latest
 
   update-manifests:
     name: Update manifests with new image tag
@@ -116,19 +119,27 @@ jobs:
     permissions:
       contents: write
 
-    env:
-      IMAGE_TAG: ${{ github.sha }}
-
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+
+      - name: Determine image tag
+        id: image-tag
+        shell: bash
+        run: |
+          if git describe --tags --exact-match >/tmp/tag 2>/dev/null; then
+            tag=$(cat /tmp/tag)
+          else
+            tag=${GITHUB_SHA::7}
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Install yq
         uses: mikefarah/yq@v4.44.3
 
       - name: Update deployment images to new tag
         run: |
-          TAG=${IMAGE_TAG::7}
+          TAG="${{ steps.image-tag.outputs.tag }}"
           for f in deploy/k8s/frontend.yaml deploy/k8s/console.yaml deploy/k8s/consumer.yaml; do
             yq -i '(.spec.template.spec.containers[].image) |= sub(":.*$"; ":" + env(TAG))' "$f"
           done
@@ -136,5 +147,5 @@ jobs:
       - name: Commit and push manifest updates
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: bump images to ${IMAGE_TAG::7}"
+          commit_message: "chore: bump images to ${{ steps.image-tag.outputs.tag }}"
           branch: ${{ github.ref_name }}
