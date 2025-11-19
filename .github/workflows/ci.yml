@@ -138,8 +138,10 @@ jobs:
         uses: mikefarah/yq@v4.44.3
 
       - name: Update deployment images to new tag
+        shell: bash
         run: |
           TAG="${{ steps.image-tag.outputs.tag }}"
+          export TAG
           for f in deploy/k8s/frontend.yaml deploy/k8s/console.yaml deploy/k8s/consumer.yaml; do
             yq -i '(.spec.template.spec.containers[].image) |= sub(":.*$"; ":" + env(TAG))' "$f"
           done
