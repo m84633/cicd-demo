@@ -17,7 +17,7 @@ spec:
         - name: ghcr-credentials
       containers:
         - name: consumer
-          image: ghcr.io/m84633/partivo-tickets-cicd-demo-consumer:latest
+          image: ghcr.io/m84633/partivo-tickets-cicd-demo-consumer:b783627
           imagePullPolicy: Always
           readinessProbe:
             exec:
