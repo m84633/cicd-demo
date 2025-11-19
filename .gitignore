@@ -22,3 +22,7 @@ config/keys/*.pem
 
 .DS_Store
 coverage.out
+
+deploy/k8s/secrets/*.yaml
+!deploy/k8s/secrets/*.sealed.yaml
+!deploy/k8s/secrets/README.md

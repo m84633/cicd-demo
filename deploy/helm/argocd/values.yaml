@@ -1,0 +1,17 @@
+# Force the host to our local domain to avoid chart defaults (argocd.example.com).
+global:
+  domain: argocd.partivo.local
+
+# Argo CD values override for ingress-nginx on local/Docker Desktop.
+# Keep the server service as ClusterIP and expose via ingress.
+server:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hostname: argocd.partivo.local
+    hosts:
+      - argocd.partivo.local
+    extraHosts: []
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+  # If you prefer plain HTTP, set server.insecure=true and adjust ingress annotation/port.
