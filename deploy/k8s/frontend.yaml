@@ -17,7 +17,7 @@ spec:
         - name: ghcr-credentials
       containers:
         - name: frontend
-          image: ghcr.io/m84633/partivo-tickets-cicd-demo-frontend:b783627
+          image: ghcr.io/m84633/partivo-tickets-cicd-demo-frontend:81f8a11
           imagePullPolicy: Always
           ports:
             - containerPort: 8090
@@ -52,3 +52,6 @@ spec:
     - name: grpc
       port: 8090
       targetPort: 8090
+  template:
+    spec:
+      containers: []
