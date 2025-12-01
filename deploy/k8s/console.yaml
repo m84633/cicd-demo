@@ -17,7 +17,7 @@ spec:
         - name: ghcr-credentials
       containers:
         - name: console
-          image: ghcr.io/m84633/partivo-tickets-cicd-demo-console:81f8a11
+          image: ghcr.io/m84633/partivo-tickets-cicd-demo-console:ad026fb
           imagePullPolicy: Always
           ports:
             - containerPort: 8081
