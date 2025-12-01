@@ -26,3 +26,5 @@ coverage.out
 deploy/k8s/secrets/*.yaml
 !deploy/k8s/secrets/*.sealed.yaml
 !deploy/k8s/secrets/README.md
+
+*.bak

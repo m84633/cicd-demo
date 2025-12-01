@@ -2,15 +2,15 @@ package mongodb
 
 import (
 	"context"
-	"partivo_tickets/internal/conf"
-	"partivo_tickets/internal/models"
-	"time"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
+	"partivo_tickets/internal/conf"
+	"partivo_tickets/internal/dao/fields"
+	"partivo_tickets/internal/models"
+	"time"
 )
 
 func NewOutboxDAO(client *mongo.Client, cfg *conf.MongodbConfig) *OutboxDAO {
@@ -39,11 +39,11 @@ func (d *OutboxDAO) ClaimAndFetchEvents(ctx context.Context, limit int) ([]*mode
 	// Phase 1: Find the IDs of potential candidate events.
 	// This is a lightweight query that only fetches IDs.
 	findOptions := options.Find().
-		SetSort(bson.D{{"created_at", 1}}). // Process oldest first
+		SetSort(bson.D{{fields.FieldCreatedAt, 1}}). // Process oldest first
 		SetLimit(int64(limit)).
-		SetProjection(bson.M{"_id": 1})
+		SetProjection(bson.M{fields.FieldObjectId: 1})
 
-	filter := bson.M{"status": models.OutboxStatusPending}
+	filter := bson.M{fields.FieldStatus: models.OutboxStatusPending}
 	cursor, err := d.outboxCollection.Find(ctx, filter, findOptions)
 	if err != nil {
 		zap.L().Error("mongodb/outbox@ClaimAndFetchEvents: Phase 1 Find failed", zap.Error(err))

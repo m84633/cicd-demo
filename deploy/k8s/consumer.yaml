@@ -19,6 +19,10 @@ spec:
         - name: consumer
           image: ghcr.io/m84633/partivo-tickets-cicd-demo-consumer:b783627
           imagePullPolicy: Always
+          volumeMounts:
+            - name: jwt-keys
+              mountPath: /app/config/keys
+              readOnly: true
           readinessProbe:
             exec:
               command:
@@ -35,3 +39,7 @@ spec:
                 - pgrep consumer >/dev/null
             initialDelaySeconds: 30
             periodSeconds: 30
+      volumes:
+        - name: jwt-keys
+          secret:
+            secretName: jwt-keys

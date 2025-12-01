@@ -37,9 +37,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 
 WORKDIR /app
 
-# 複製設定檔和金鑰檔
+# 複製設定檔
 COPY internal/conf /app/config
-COPY config/keys /app/config/keys
 
 # 從 builder 階段複製已編譯好的 server 執行檔
 COPY --from=builder /server /app/server
@@ -60,9 +59,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 
 WORKDIR /app
 
-# 複製設定檔和金鑰檔
+# 複製設定檔
 COPY internal/conf /app/config
-COPY config/keys /app/config/keys
 
 # 從 builder 階段複製已編譯好的 server 執行檔
 COPY --from=builder /server /app/server
@@ -83,9 +81,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 
 WORKDIR /app
 
-# 複製設定檔和金鑰檔
+# 複製設定檔
 COPY internal/conf /app/config
-COPY config/keys /app/config/keys
 
 # 從 builder 階段複製已編譯好的 consumer 執行檔
 COPY --from=builder /consumer /app/consumer
