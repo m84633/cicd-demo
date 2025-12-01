@@ -4,6 +4,7 @@ namespace: partivo-tickets
 resources:
   - namespace.yaml
   - secrets/ghcr-credentials.sealed.yaml
+  - secrets/jwt-keys.sealed.yaml
   - frontend.yaml
   - console.yaml
   - consumer.yaml
