@@ -17,7 +17,7 @@ spec:
         - name: ghcr-credentials
       containers:
         - name: consumer
-          image: ghcr.io/m84633/partivo-tickets-cicd-demo-consumer:cf8a56c
+          image: ghcr.io/m84633/partivo-tickets-cicd-demo-consumer:3e10019
           imagePullPolicy: Always
           volumeMounts:
             - name: jwt-keys
